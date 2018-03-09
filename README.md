@@ -1,6 +1,8 @@
-# repository-title-goes-here
+# simple-merge-examples
 
 This is a single file stand-alone application using R Markdown.
+
+You need the dply and magrittr libraries.
 
 It was run and tested using RStudio and the knitr package.
 

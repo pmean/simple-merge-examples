@@ -1,0 +1,102 @@
+---
+title: "Merging files"
+author: "Steve Simon"
+date: "March 8, 2018"
+output: html_document
+---
+
+Here's a basic talk on merging. I'm going to use merging in the very general sense of combining. The simplest operator in R for combining is c().
+
+```{r illustrate-c}
+v01 <- 4:7
+v02 <- 8:9
+c(v01, v02)
+```
+
+The append function also will combine, but gives you some control over the location where the combination occurs.
+
+```{r illustrate-append}
+append(v01, v02)
+append(v01, v02, after=2)
+```
+
+The cbind function will place two or more vectors side by side to form a matrix.
+
+```{r illustrate-cbind}
+v03 <- 2:6
+v04 <- 4:8
+v05 <- 5:9
+cbind(v03, v04, v05)
+```
+
+You can also use cbind to combine a matrix with a vector or to combine two matrices. If the dimensions of the vectors/matrices do not conform, you might get an error or you might get a warning with the shorter vector being recycled.
+
+```{r non-conforming vectors}
+v06 <- 1
+v07 <- 1:2
+v08 <- 1:6
+cbind(v06, v07, v08)
+```
+
+The rbind function works similarly to cbind, but places one vector beneath the other.
+
+```{r illustrate-rbind}
+v09 <- 1:4
+v10 <- 5:8
+rbind(v09, v10)
+```
+
+The merge function will join two data frames matched by a key variable.
+
+```{r illustrate-merge}
+d01 <- data.frame(a=1:4, u=5:8)
+d02 <- data.frame(a=1:4, v=4:7)
+merge(d01, d02)
+```
+
+The default in the merge function is to use as the key variables all the columns that have the same name across both . If the key variable has different names, use the by.x and by.y arguments.
+
+```{r illustrate-by}
+d03 <- data.frame(a=1:4, u=5:8)
+d04 <- data.frame(b=1:4, v=4:7)
+merge(d03, d04, by.x="a", by.y="b")
+```
+
+When there is a mismatch in the key variable, the default in the merge function is to discard the mismatches (or in database parlance, an inner join). You can use the all argument or the all.x and all.y arguments to get left, right, and outer joins.
+
+```{r illustrate-all}
+d05 <- data.frame(a=1:3, u=5:7)
+d06 <- data.frame(a=2:4, v=4:6)
+merge(d05, d06)
+merge(d05, d06, all.x=TRUE)
+merge(d05, d06, all.y=TRUE)
+merge(d05, d06, all=TRUE)
+```
+
+There are new functions in the dplyr library that you should consider using instead of cbind, rbind, and merge. They are much faster, the syntax is typically much cleaner, and these functions can integrate better with an underlying SQL database. The dplyr functions also work easily with the pipe operator.
+
+The only limitation is that these dplyr functions do not work with vectors.
+
+```{r illustrate-dplyr}
+library(dplyr)
+library(magrittr)
+# bind_cols instead of cbind.
+
+d07 <- data.frame(v03)
+d08 <- data.frame(v04)
+d09 <- data.frame(v05)
+d07 %>% bind_cols(d08, d09)
+
+# bind_rows instead of rbind.
+d10 <- data.frame(a=1, b=2)
+d11 <- data.frame(a=3, b=4)
+d10 %>% bind_rows(d11)
+
+# inner_join, left_join, rigt_join, full_join instead of merge.
+d05 %>% left_join(d06)
+```
+
+The syntax for joining when the key variables have different names is a bit strange.
+
+```{r mismatch-key}
+d03 %>% inner_join(d04, by=c("a"="b"))
